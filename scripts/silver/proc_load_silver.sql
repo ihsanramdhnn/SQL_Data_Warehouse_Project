@@ -1,7 +1,18 @@
-exec silver.load_silver
+
 
 create or alter procedure silver.load_silver as
 begin
+declare @start_time datetime, @end_time datetime, @batch_start_time datetime, @batch_end_time datetime
+begin try
+set @batch_start_time = getdate()
+print '============================================'
+print 'Load Silver Layer'
+print '============================================'
+
+print 'Loading silver.crm_cust_info'
+print '--------------------------------------------'
+
+set @start_time = getdate()
 print '>> Truncating Table: silver.crm_cust_info'
 truncate table silver.crm_cust_info
 print '>> Inserting Data Into: silver.crm_cust_info'
@@ -35,7 +46,14 @@ row_number() over(partition by cst_id order by cst_create_date desc) as flag_las
 from bronze.crm_cust_info
 where cst_id is not null
 )t where flag_last = 1 -- Handling duplicates by select the most recent record per customer
+set @end_time = getdate()
+print '>> Load Duration: ' + cast(datediff(second, @start_time, @end_time) as nvarchar) + ' Seconds'
+print '============================================'
 
+print 'Loading silver.crm_prd_info'
+print '--------------------------------------------'
+
+set @start_time = getdate()
 print '>> Truncating Table: silver.crm_prd_info'
 truncate table silver.crm_prd_info
 print '>> Inserting Data Into: silver.crm_prd_info'
@@ -65,7 +83,14 @@ cast (prd_start_dt as date) as prd_start_dt, -- Data Transformation (datetime ->
 cast (lead(prd_start_dt) over (partition by prd_key ORDER BY prd_start_dt)-1 as date) 
 as prd_end_dt -- Calculate end date as one day before the next start date
   FROM bronze.crm_prd_info
+set @end_time = getdate()
+print '>> Load Duration: ' + cast(datediff(second, @start_time, @end_time) as nvarchar) + ' Seconds'
+print '============================================'
 
+print 'Loading silver.crm_sales_details'
+print '--------------------------------------------'
+
+set @start_time = getdate()
 print '>> Truncating Table: silver.crm_sales_details'
 truncate table silver.crm_sales_details
 print '>> Inserting Data Into: silver.crm_sales_details'
@@ -103,7 +128,14 @@ case when sls_price is null or sls_price <=0
 	else sls_price
 end as sls_price -- Handling invalid data by recalculate price if original value is missing or incorrect
 from bronze.crm_sales_details
+set @end_time = getdate()
+print '>> Load Duration: ' + cast(datediff(second, @start_time, @end_time) as nvarchar) + ' Seconds'
+print '============================================'
 
+print 'Loading silver.erp_cust_az12'
+print '--------------------------------------------'
+
+set @start_time = getdate()
 print '>> Truncating Table:	silver.erp_cust_az12'
 truncate table silver.erp_cust_az12
 print '>> Inserting Data Into: silver.erp_cust_az12'
@@ -123,7 +155,14 @@ case when upper(trim(gen)) in ('F', 'Female') then 'Female' -- Handling NULL and
 else 'n/a'
 end as gen
 from bronze.erp_cust_az12
+set @end_time = getdate()
+print '>> Load Duration: ' + cast(datediff(second, @start_time, @end_time) as nvarchar) + ' Seconds'
+print '============================================'
 
+print 'Loading silver.erp_loc_a101'
+print '--------------------------------------------'
+
+set @start_time = getdate()
 print '>> Truncating Table: silver.erp_loc_a101'
 truncate table silver.erp_loc_a101
 print '>> Inserting Data Into silver.erp_loc_a101'
@@ -136,7 +175,14 @@ case when trim(cntry) = 'DE' then 'Germany' -- Normalize and handling missing or
 	else trim(cntry)
 end as cntry
 from bronze.erp_loc_a101
+set @end_time = getdate()
+print '>> Load Duration: ' + cast(datediff(second, @start_time, @end_time) as nvarchar) + ' Seconds'
+print '============================================'
 
+print 'Loading silver.erp_px_cat_g1v2'
+print '--------------------------------------------'
+
+set @start_time = getdate()
 print '>> Truncating Table: silver.erp_px_cat_g1v2'
 truncate table silver.erp_px_cat_g1v2
 print '>> Inserting Data Into: silver.erp_px_cat_g1v2'
@@ -148,4 +194,23 @@ cat,
 subcat,
 maintenance
 from bronze.erp_px_cat_g1v2
+set @end_time = getdate()
+print '>> Load Duration: ' + cast(datediff(second, @start_time, @end_time) as nvarchar) + ' Seconds'
+print '============================================'
+
+set @batch_end_time = getdate()
+print '============================================'
+print 'Loading Silver Layer is Completed'
+print '   - Total Load Duration: ' +cast(datediff(second, @batch_start_time, @batch_end_time) as nvarchar) + ' Seconds'
+print '============================================'
+
+end try
+begin catch
+print '============================================'
+print 'Error occurred during loading silver layer'
+print 'Error Message' + error_message()
+print 'Error Message' + cast(error_number() as nvarchar)
+print 'Error Message' + cast(error_state() as nvarchar)
+print '============================================'
+end catch
 end
