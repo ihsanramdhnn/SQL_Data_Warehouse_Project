@@ -93,3 +93,21 @@ case when sls_price is null or sls_price <=0
 	else sls_price
 end as sls_price -- Handling invalid data by recalculate price if original value is missing or incorrect
 from bronze.crm_sales_details
+
+-- Cleaning bronze.erp_cust_az12 --
+insert into silver.erp_cust_az12 (
+cid,
+bdate,
+gen)
+SELECT 
+case when cid like 'NAS%' then substring(cid,4,len(cid)) -- Remove 'NAS' prefix because it's irrelevant
+	else cid
+end as cid,
+case when bdate > getdate() then null -- Set future bdate to NULL
+else bdate
+end as bdate,
+case when upper(trim(gen)) in ('F', 'Female') then 'Female' -- Handling NULL and empty values and normalize gender values
+	when upper (trim(gen)) in ('M', 'Male') then 'Male'
+else 'n/a'
+end as gen
+from bronze.erp_cust_az12
