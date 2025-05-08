@@ -4,19 +4,23 @@ Stored Procedure: Load Silver Layer (Source -> Bronze)
 ======================================================================================
 Script Purpose:
 This stored procedure loads data from the bronze layer into the silver schema. It performs a series of
-data quality operations to ensure consistency, accuracy, and standardization across the silver layer. The main operations include:
+ETL (Exract, Tranform, Load) process to populate 'silver' schema tables from 'bronze' schema.
+The main operations include:
+  - Truncate Silver Tables.
+  - Insert Transformed and cleaned data from bronze into silver layer.
+ETL processes:
   - Data Cleansing: Handles missing, null, or invalid values.
   - Data Standardization: Maps codes or inconsistent entries into standardized, descriptive formats.
   - Data Normalization: Ensures uniform structure and format of data for consistency across tables.
   - Derived Columns: Creates new columns based on transformations or calculations to enhance usability.
   - Data Enrichment: Enhances existing data by integrating additional relevant information or calculated fields.
 
-Usage notes:
-  - Run these checks after data loading into silver layer.
-  This stored procedure does not accept any parameters or return any values.
+Parameters:
+   None
+   This stored procedure does not accept any parameters or return any values.
 
 Usage Example:
-  EXEC bronze.load_bronze;
+  EXEC silver.load_silver;
 =====================================================================================
 */
 
