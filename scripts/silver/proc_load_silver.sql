@@ -1,4 +1,10 @@
--- Cleaning bronze.crm_cust_info table --
+exec silver.load_silver
+
+create or alter procedure silver.load_silver as
+begin
+print '>> Truncating Table: silver.crm_cust_info'
+truncate table silver.crm_cust_info
+print '>> Inserting Data Into: silver.crm_cust_info'
 insert into silver.crm_cust_info(
 	cst_id,
 	cst_key,
@@ -30,7 +36,9 @@ from bronze.crm_cust_info
 where cst_id is not null
 )t where flag_last = 1 -- Handling duplicates by select the most recent record per customer
 
--- Cleaning bronze.crm_prd_info table --
+print '>> Truncating Table: silver.crm_prd_info'
+truncate table silver.crm_prd_info
+print '>> Inserting Data Into: silver.crm_prd_info'
 insert into silver.crm_prd_info(
 prd_id,
 cat_id,
@@ -58,7 +66,9 @@ cast (lead(prd_start_dt) over (partition by prd_key ORDER BY prd_start_dt)-1 as 
 as prd_end_dt -- Calculate end date as one day before the next start date
   FROM bronze.crm_prd_info
 
--- Cleaning bronze.crm_sales_details table --
+print '>> Truncating Table: silver.crm_sales_details'
+truncate table silver.crm_sales_details
+print '>> Inserting Data Into: silver.crm_sales_details'
 insert into silver.crm_sales_details (
 sls_ord_num,
 sls_prd_key,
@@ -94,7 +104,9 @@ case when sls_price is null or sls_price <=0
 end as sls_price -- Handling invalid data by recalculate price if original value is missing or incorrect
 from bronze.crm_sales_details
 
--- Cleaning bronze.erp_cust_az12 --
+print '>> Truncating Table:	silver.erp_cust_az12'
+truncate table silver.erp_cust_az12
+print '>> Inserting Data Into: silver.erp_cust_az12'
 insert into silver.erp_cust_az12 (
 cid,
 bdate,
@@ -111,3 +123,29 @@ case when upper(trim(gen)) in ('F', 'Female') then 'Female' -- Handling NULL and
 else 'n/a'
 end as gen
 from bronze.erp_cust_az12
+
+print '>> Truncating Table: silver.erp_loc_a101'
+truncate table silver.erp_loc_a101
+print '>> Inserting Data Into silver.erp_loc_a101'
+insert into silver.erp_loc_a101(cid, cntry)
+select 
+replace(cid,'-','') as cid, -- Remove '-' to connect the column
+case when trim(cntry) = 'DE' then 'Germany' -- Normalize and handling missing or blank country values
+	when trim(cntry) in ('US','USA') then 'United States'
+	when trim(cntry) = '' or cntry is null then 'n/a'
+	else trim(cntry)
+end as cntry
+from bronze.erp_loc_a101
+
+print '>> Truncating Table: silver.erp_px_cat_g1v2'
+truncate table silver.erp_px_cat_g1v2
+print '>> Inserting Data Into: silver.erp_px_cat_g1v2'
+insert into silver.erp_px_cat_g1v2
+(id, cat, subcat, maintenance)
+select 
+id,
+cat,
+subcat,
+maintenance
+from bronze.erp_px_cat_g1v2
+end
