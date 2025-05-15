@@ -1,11 +1,16 @@
-# sql-data-warehouse-project
-Project learning about how to build Data Warehouse
+# 🧠 SQL Data Warehouse Project
+This learning project was designed to build practical experience in designing, developing, and implementing a modern data warehouse using SQL Server.
+The project follows the Medallion Architecture (Bronze, Silver, and Gold layers), widely used in scalable data platforms.
 ---
-## 🏗️ Data Architecture
+## 🏗️ Data Architecture Overview
+**Bronze Layer**
+Ingests raw data directly from source systems (CSV files from ERP and CRM) and stores them in SQL Server without modification.
 
-1. **Bronze Layer**: Stores raw data as-is from the source systems. Data is ingested from CSV Files into SQL Server Database.
-2. **Silver Layer**: This layer includes data cleansing, standardization, and normalization processes to prepare data for analysis.
-3. **Gold Layer**: Houses business-ready data modeled into a star schema required for reporting and analytics.
+**Silver Layer**
+Performs data cleansing, standardization, normalization, and deduplication to prepare clean, structured data for analytical use.
+
+**Gold Layer**
+Contains business-ready data modeled into a star schema, with optimized fact and dimension tables used for reporting and analytics.
 
 ---
 ## 📖 Project Overview
