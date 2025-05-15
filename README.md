@@ -1,6 +1,8 @@
 # 🧠 SQL Data Warehouse Project
+
 This learning project was designed to build practical experience in designing, developing, and implementing a modern data warehouse using SQL Server.
 The project follows the Medallion Architecture (Bronze, Silver, and Gold layers), widely used in scalable data platforms.
+
 ---
 ## 🏗️ Data Architecture Overview
 **Bronze Layer**
