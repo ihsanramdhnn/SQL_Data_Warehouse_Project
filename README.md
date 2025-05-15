@@ -5,13 +5,13 @@ The project follows the Medallion Architecture (Bronze, Silver, and Gold layers)
 
 ---
 ## 🏗️ Data Architecture Overview
-**Bronze Layer**
+**Bronze Layer:**
 Ingests raw data directly from source systems (CSV files from ERP and CRM) and stores them in SQL Server without modification.
 
-**Silver Layer**
+**Silver Layer:**
 Performs data cleansing, standardization, normalization, and deduplication to prepare clean, structured data for analytical use.
 
-**Gold Layer**
+**Gold Layer:**
 Contains business-ready data modeled into a star schema, with optimized fact and dimension tables used for reporting and analytics.
 
 ---
